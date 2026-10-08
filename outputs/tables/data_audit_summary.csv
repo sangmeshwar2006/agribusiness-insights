@@ -1,0 +1,6 @@
+Column,Missing_Pct,Min,Median,Max,IQR_Outliers,IQR_Outlier_Pct,Robust_Z_Outliers_3.5,Robust_Z_Pct
+yield_t_ha,0.0,0.4,2.08,14.76,1053,8.77,924,7.7
+rainfall_mm,0.0,180.0,644.95,1766.6,1,0.01,0,0.0
+tmax_c,0.0,24.3,31.7,38.0,0,0.0,0,0.0
+price_usd_per_t,0.0,114.12,331.7,2650.38,1875,15.62,1870,15.58
+fertiliser_kg_ha,0.2,20.0,117.6,313.0,286,2.39,35,0.29

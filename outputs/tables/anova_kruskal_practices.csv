@@ -1,0 +1,4 @@
+Factor,ANOVA_F,ANOVA_p,Kruskal_H,Kruskal_p,Eta_Squared
+Irrigation Status,509.51,1.60e-110,924.03,5.86e-203,0.041
+Fertiliser Band,1247.24,0.00e+00,814.76,1.19e-177,0.094
+Soil Type,12.76,2.29e-10,66.08,1.52e-13,0.001

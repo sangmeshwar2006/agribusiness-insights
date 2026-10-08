@@ -1,0 +1,49 @@
+Crop,Region,Trend,p_value,Tau,Sen_Slope_t_ha_yr,Significant_5pct
+Canola,Eastern-Valley,no trend,0.58125,0.095,0.0089,False
+Canola,High-Plains,no trend,0.22997,0.2,0.0181,False
+Canola,Lake-States,no trend,0.5376,0.105,0.0091,False
+Canola,Midwest-Central,no trend,0.38103,0.147,0.0053,False
+Canola,Northern-Plains,no trend,0.34676,0.158,0.0101,False
+Canola,Southeast-Coastal,increasing,0.02972,0.358,0.0121,True
+Canola,Southern-Delta,increasing,0.01786,0.389,0.014,True
+Canola,Western-Basin,no trend,0.08551,0.284,0.0182,False
+Corn,Eastern-Valley,no trend,0.77029,0.053,0.0156,False
+Corn,High-Plains,no trend,0.14429,0.242,0.0733,False
+Corn,Lake-States,no trend,0.22997,0.2,0.0762,False
+Corn,Midwest-Central,no trend,0.6265,0.084,0.032,False
+Corn,Northern-Plains,no trend,0.4173,0.137,0.0283,False
+Corn,Southeast-Coastal,no trend,0.82034,-0.042,-0.009,False
+Corn,Southern-Delta,no trend,0.08551,0.284,0.0489,False
+Corn,Western-Basin,no trend,0.05559,0.316,0.0927,False
+Cotton,Eastern-Valley,no trend,0.5376,0.105,0.0048,False
+Cotton,High-Plains,no trend,0.49566,0.116,0.0091,False
+Cotton,Lake-States,no trend,0.43594,0.132,0.0072,False
+Cotton,Midwest-Central,no trend,0.29891,0.174,0.0118,False
+Cotton,Northern-Plains,no trend,0.45554,0.126,0.0085,False
+Cotton,Southeast-Coastal,no trend,0.77029,0.053,0.0031,False
+Cotton,Southern-Delta,no trend,0.05973,0.311,0.0113,False
+Cotton,Western-Basin,no trend,0.12729,0.253,0.0141,False
+Soybeans,Eastern-Valley,increasing,0.01248,0.411,0.0151,True
+Soybeans,High-Plains,no trend,0.1192,0.258,0.046,False
+Soybeans,Lake-States,no trend,0.45554,0.126,0.0103,False
+Soybeans,Midwest-Central,no trend,0.38103,0.147,0.0149,False
+Soybeans,Northern-Plains,no trend,0.09799,0.274,0.0346,False
+Soybeans,Southeast-Coastal,increasing,0.02518,0.368,0.0195,True
+Soybeans,Southern-Delta,no trend,0.39867,0.142,0.0101,False
+Soybeans,Western-Basin,increasing,0.04095,0.337,0.0337,True
+Spring Wheat,Eastern-Valley,increasing,0.03496,0.347,0.0196,True
+Spring Wheat,High-Plains,increasing,0.0,0.747,0.0496,True
+Spring Wheat,Lake-States,no trend,0.45554,0.126,0.019,False
+Spring Wheat,Midwest-Central,no trend,0.72118,0.063,0.0055,False
+Spring Wheat,Northern-Plains,no trend,0.20575,0.211,0.0236,False
+Spring Wheat,Southeast-Coastal,increasing,0.02729,0.363,0.0091,True
+Spring Wheat,Southern-Delta,no trend,0.08519,0.284,0.021,False
+Spring Wheat,Western-Basin,increasing,0.01496,0.4,0.0316,True
+Winter Wheat,Eastern-Valley,no trend,1.0,0.0,0.0006,False
+Winter Wheat,High-Plains,no trend,0.05559,0.316,0.0406,False
+Winter Wheat,Lake-States,no trend,0.58125,0.095,0.0116,False
+Winter Wheat,Midwest-Central,no trend,0.5376,-0.105,-0.0097,False
+Winter Wheat,Northern-Plains,no trend,0.49566,0.116,0.0257,False
+Winter Wheat,Southeast-Coastal,increasing,0.01786,0.389,0.0136,True
+Winter Wheat,Southern-Delta,no trend,0.29891,0.174,0.0152,False
+Winter Wheat,Western-Basin,increasing,0.0478,0.326,0.047,True

@@ -1,0 +1,9 @@
+Hypothesis,Test_Method,Statistic,p_value,Effect_Size,CI_95_Bootstrap,Supported,BH_Adjusted_p_value
+"H1: Yield rises over time, slower in rain-fed regions",Panel OLS Interaction (season * irrigated),t = 13.16,2.75e-39,Delta slope = +0.0647 t/ha/yr,"[0.0390, 0.0922]",Supported,7.34e-39
+H2: Yield CV is higher in last decade (2015-24 vs 2005-14),Paired t-test on Field CV,t = 11.58,2.06e-28,Delta CV = +5.37% (Cohen d = 0.47),"[4.49%, 6.31%]",Supported,4.12e-28
+H3: Flowering stress explains more variation than seasonal totals,Non-nested Model R² Delta Comparison,Delta R^2 = 0.035,0.0010,Phenological R^2=0.615 vs Seasonal R^2=0.580,"[0.026, 0.045]",Supported,0.0010
+H4: Rainfall-yield relationship is non-linear,Quadratic Term OLS Partial F/t-test,t = -30.28,3.64e-194,beta_2 = -4.43e-06 (Delta R^2 = 0.029),"[-4.41e-06, -2.96e-06]",Supported,1.46e-193
+H5: Irrigated fields have higher mean yield and lower variance,Welch's t-test (Mean) & Levene's test (Variance),"t = 39.84, Levene W = 94.41",0.00e+00,"Cohen d = +0.74, SD Ratio = 0.90","[0.27, 0.38] index",Supported,0.00e+00
+H6: Regional yield shortfalls followed by price rise in 4-12 wks,Distributed Lag Correlation (Shortfall vs Delta Price),r = 0.975,3.92e-13,r = 0.975 (Lag +8 weeks Elasticity),"[0.937, 0.991]",Supported,5.23e-13
+H7: Prices are lowest within 6 weeks of harvest,Paired t-test (Harvest Window vs Off-Season),t = -19.03,3.91e-14,Basis Discount = -8.58%,"[-8.66%, -8.50%]",Supported,6.25e-14
+H8: Yield anomalies are spatially clustered,PySAL Global Moran's I Permutation Test,Moran's I = 0.108,0.0010,Spatial Autocorrelation I = 0.108,"[0.063, 0.153]",Supported,0.0010

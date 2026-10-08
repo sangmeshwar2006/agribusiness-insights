@@ -16,12 +16,12 @@ import sys
 import pandas as pd
 import numpy as np
 
-# Use Agg backend for Matplotlib so it saves charts headlessly without popups
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-# Ensure Windows PowerShell/CMD console handles UTF-8 characters like currency symbols
+
 if hasattr(sys.stdout, "reconfigure"):
     try:
         sys.stdout.reconfigure(encoding="utf-8")
@@ -34,10 +34,6 @@ def main():
     print("      AGRIBUSINESS DATA COLLECTION AND CLEANING PIPELINE")
     print("=" * 75)
 
-    # --------------------------------------------------------------------------
-    # STEP 1 & 2: SETUP FILE PATHS AND LOAD DATA
-    # --------------------------------------------------------------------------
-    # Determine base directory dynamically so the script runs from any folder
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.abspath(os.path.join(script_dir, ".."))
     
@@ -46,13 +42,10 @@ def main():
 
     print(f"\n[INFO] Loading raw dataset from:\n  -> {raw_data_path}")
     
-    # Load raw dataset into a Pandas DataFrame
+   
     df_raw = pd.read_csv(raw_data_path)
-    df = df_raw.copy()  # Work on a copy to preserve raw data
-
-    # --------------------------------------------------------------------------
-    # STEP 3: INITIAL DATA INSPECTION
-    # --------------------------------------------------------------------------
+    df = df_raw.copy() 
+    
     print("\n" + "-" * 75)
     print("STEP 1: INITIAL DATA INSPECTION")
     print("-" * 75)

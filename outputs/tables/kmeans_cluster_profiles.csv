@@ -1,0 +1,4 @@
+,mean_yield,cv_yield,mean_rainfall,mean_heat_days,mean_fert,mean_margin,irrigation_ratio,Field_Count
+Cluster 0: High-Input Resilient Commercial,2.59,21.29,390.32,6.08,121.74,536.85,0.68,151
+Cluster 1: Rain-Fed Climate-Exposed,7.03,40.86,718.63,6.05,217.35,590.86,0.42,91
+Cluster 2: Moderate Semi-Arid Irrigated,1.85,44.05,815.38,6.05,100.92,264.61,0.22,358
