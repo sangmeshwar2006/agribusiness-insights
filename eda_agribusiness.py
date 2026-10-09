@@ -29,8 +29,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import geopandas as gpd
 from shapely.geometry import Point
-import folium
-from folium.plugins import MarkerCluster
 import libpysal
 import esda
 from sklearn.cluster import KMeans
@@ -67,184 +65,8 @@ for d in [DATA_DIR, OUTPUT_FIG_DIR, OUTPUT_TAB_DIR]:
 
 
 # ==============================================================================
-# 0. DATASET GENERATION (Realistic Synthetic Generator if agri_data.csv missing)
+# 0. DATASET LOADING
 # ==============================================================================
-def generate_synthetic_agri_data(filepath: str, n_rows: int = 12000) -> pd.DataFrame:
-    """
-    Generates a realistic agribusiness panel dataset covering 8 regions, 6 crops,
-    and the years 2005-2024 (20 seasons), with drought years, rising yield trends,
-    and biophysical links between rainfall, irrigation, and yield.
-    """
-    print(f"[DATA GEN] Generating {n_rows} rows of synthetic agribusiness panel data...")
-    regions_info = {
-        'Midwest-Central':    {'lat': 41.5, 'lon': -93.5, 'base_rain': 850, 'rain_sd': 110, 'base_tmax': 29.5},
-        'Northern-Plains':    {'lat': 46.5, 'lon': -99.5, 'base_rain': 520, 'rain_sd': 85,  'base_tmax': 28.0},
-        'Southern-Delta':     {'lat': 33.5, 'lon': -90.5, 'base_rain': 1050, 'rain_sd': 140, 'base_tmax': 33.5},
-        'Western-Basin':      {'lat': 39.0, 'lon': -111.0, 'base_rain': 380, 'rain_sd': 60,  'base_tmax': 32.0},
-        'Eastern-Valley':     {'lat': 38.5, 'lon': -81.5, 'base_rain': 980, 'rain_sd': 120, 'base_tmax': 28.5},
-        'Southeast-Coastal':  {'lat': 32.0, 'lon': -83.5, 'base_rain': 1100, 'rain_sd': 150, 'base_tmax': 33.0},
-        'Lake-States':        {'lat': 44.5, 'lon': -86.5, 'base_rain': 820, 'rain_sd': 100, 'base_tmax': 27.5},
-        'High-Plains':        {'lat': 36.5, 'lon': -101.5, 'base_rain': 460, 'rain_sd': 75,  'base_tmax': 32.5}
-    }
-    
-    crops_info = {
-        'Corn':         {'base_yield': 9.8, 'yield_sd': 1.6, 'base_price': 195, 'fert_mean': 210, 'opt_rain': 780},
-        'Soybeans':     {'base_yield': 3.4, 'yield_sd': 0.55, 'base_price': 460, 'fert_mean': 45,  'opt_rain': 720},
-        'Winter Wheat': {'base_yield': 4.4, 'yield_sd': 0.70, 'base_price': 235, 'fert_mean': 110, 'opt_rain': 620},
-        'Spring Wheat': {'base_yield': 3.6, 'yield_sd': 0.60, 'base_price': 255, 'fert_mean': 95,  'opt_rain': 550},
-        'Cotton':       {'base_yield': 1.9, 'yield_sd': 0.35, 'base_price': 1650, 'fert_mean': 140, 'opt_rain': 750},
-        'Canola':       {'base_yield': 2.5, 'yield_sd': 0.40, 'base_price': 510, 'fert_mean': 120, 'opt_rain': 580}
-    }
-    
-    soil_types = ['Silt-Loam', 'Clay-Loam', 'Loam', 'Sandy-Loam', 'Clay']
-    soil_multipliers = {'Silt-Loam': 1.08, 'Clay-Loam': 1.03, 'Loam': 1.00, 'Sandy-Loam': 0.88, 'Clay': 0.94}
-    
-    seasons = list(range(2005, 2025))  # 20 seasons
-    n_fields = n_rows // len(seasons)   # 600 unique fields observed across 20 seasons
-    
-    # Drought years characterized by macro precipitation deficits and heat waves
-    # Heightened frequency in Decade 2 (2015-2024) reflects intensifying climatic volatility
-    drought_years = {2008: 0.68, 2012: 0.55, 2017: 0.64, 2019: 0.68, 2021: 0.60, 2023: 0.58}
-    
-    # Generate 600 fixed field establishments
-    fields = []
-    reg_keys = list(regions_info.keys())
-    crop_keys = list(crops_info.keys())
-    
-    for fid in range(1, n_fields + 1):
-        reg = np.random.choice(reg_keys)
-        district_num = np.random.randint(1, 4)
-        district = f"{reg}_D{district_num}"
-        crop = np.random.choice(crop_keys)
-        soil = np.random.choice(soil_types, p=[0.30, 0.25, 0.25, 0.12, 0.08])
-        area = np.round(np.random.gamma(shape=4.0, scale=35.0), 1)  # ~140 ha average
-        area = np.clip(area, 25.0, 450.0)
-        
-        # Geolocation jitter around regional center
-        lat = regions_info[reg]['lat'] + np.random.normal(0, 0.45)
-        lon = regions_info[reg]['lon'] + np.random.normal(0, 0.55)
-        
-        # Irrigation infrastructure probability depends on regional aridity
-        base_irr_prob = 0.65 if reg in ['Western-Basin', 'High-Plains'] else 0.25
-        irrigated_field = 1 if np.random.rand() < base_irr_prob else 0
-        variety = np.random.choice(['Drought-Tolerant Hybrid', 'High-Yield Hybrid', 'Conventional Standard'], 
-                                   p=[0.35, 0.45, 0.20])
-        
-        fields.append({
-            'field_id': f"F{fid:04d}",
-            'region': reg,
-            'district': district,
-            'crop': crop,
-            'soil_type': soil,
-            'area_ha': area,
-            'latitude': lat,
-            'longitude': lon,
-            'irrigated': irrigated_field,
-            'variety': variety
-        })
-        
-    records = []
-    # Annual market baseline inflation deflator
-    cpi_base_2020 = {yr: 100 * ((1 + 0.024) ** (yr - 2020)) for yr in seasons}
-    
-    for f in fields:
-        reg_meta = regions_info[f['region']]
-        crop_meta = crops_info[f['crop']]
-        
-        for yr in seasons:
-            # Macro weather shock
-            is_drought = yr in drought_years
-            rain_factor = drought_years[yr] if is_drought else np.random.normal(1.02, 0.12)
-            
-            # Seasonal rainfall
-            rain = max(180.0, np.random.normal(reg_meta['base_rain'] * rain_factor, reg_meta['rain_sd'] * 0.7))
-            
-            # Sub-seasonal flowering rainfall (critical 4-week window: anthesis/pod set)
-            flowering_frac = np.random.uniform(0.18, 0.28) if not is_drought else np.random.uniform(0.08, 0.16)
-            flowering_rain = rain * flowering_frac
-            
-            # Temperatures
-            t_anomaly = 2.8 if is_drought else np.random.normal(0.0, 0.7)
-            tmax = reg_meta['base_tmax'] + t_anomaly + np.random.normal(0, 0.6)
-            tmin = tmax - np.random.uniform(10.5, 14.5)
-            
-            # Heat stress days (daily tmax > 33 C during reproductive stages)
-            heat_days = int(np.clip(np.random.poisson(lam=12.0 if is_drought else 3.5), 0, 32))
-            
-            # Fertiliser applied
-            fert = max(20.0, np.random.normal(crop_meta['fert_mean'], 22.0) * (1.15 if f['irrigated'] else 0.95))
-            
-            # Biophysical Yield Function:
-            # 1. Long-term technological genetic trend: +1.4% per year, but faster for irrigated (+1.7%) than rain-fed (+0.9%)
-            trend_rate = 0.017 if f['irrigated'] == 1 else 0.009
-            trend_mult = 1.0 + trend_rate * (yr - 2005)
-            
-            # 2. Non-linear quadratic rainfall response
-            opt_r = crop_meta['opt_rain']
-            effective_rain = rain + (280.0 if f['irrigated'] == 1 else 0.0)
-            rain_deviation = (effective_rain - opt_r) / 300.0
-            quadratic_water_response = 1.0 - 0.28 * (rain_deviation ** 2)
-            quadratic_water_response = max(0.35, quadratic_water_response)
-            
-            # 3. Reproductive flowering stress penalties (direct biological loss during anthesis/silking)
-            flowering_penalty = max(0.0, (140.0 - flowering_rain) / 160.0)
-            heat_penalty = heat_days * 0.024
-            stress_mult = max(0.20, 1.0 - (flowering_penalty + heat_penalty) * (0.30 if f['irrigated'] else 1.0))
-            
-            # 4. Variety & Soil factors
-            var_mult = 1.08 if f['variety'] == 'High-Yield Hybrid' else (1.04 if f['variety'] == 'Drought-Tolerant Hybrid' and is_drought else 0.96)
-            soil_mult = soil_multipliers[f['soil_type']]
-            
-            # Base yield simulation
-            y_expected = (crop_meta['base_yield'] * trend_mult * quadratic_water_response * 
-                          stress_mult * var_mult * soil_mult)
-            
-            # Noise: Irrigated fields have substantially lower yield variance
-            noise_sd = (crop_meta['yield_sd'] * 0.25) if f['irrigated'] == 1 else (crop_meta['yield_sd'] * 0.75)
-            y_actual = max(0.4, np.random.normal(y_expected, noise_sd))
-            
-            # Commodity Prices: Driven by inflation, national crop supply shortfalls, and macro cycle
-            # Severe drought years (e.g. 2012) trigger price spikes (+25% to +45%)
-            drought_price_premium = 1.35 if is_drought else 1.0
-            inflation_factor = cpi_base_2020[yr] / 100.0
-            p_usd = crop_meta['base_price'] * inflation_factor * drought_price_premium * np.random.normal(1.0, 0.06)
-            
-            records.append({
-                'field_id': f['field_id'],
-                'region': f['region'],
-                'district': f['district'],
-                'crop': f['crop'],
-                'season': yr,
-                'yield_t_ha': round(float(y_actual), 2),
-                'area_ha': round(float(f['area_ha']), 1),
-                'price_usd_per_t': round(float(p_usd), 2),
-                'rainfall_mm': round(float(rain), 1),
-                'flowering_rainfall_mm': round(float(flowering_rain), 1),
-                'tmax_c': round(float(tmax), 1),
-                'tmin_c': round(float(tmin), 1),
-                'heat_stress_days': heat_days,
-                'irrigated': int(f['irrigated']),
-                'variety': f['variety'],
-                'soil_type': f['soil_type'],
-                'fertiliser_kg_ha': round(float(fert), 1),
-                'latitude': round(float(f['latitude']), 4),
-                'longitude': round(float(f['longitude']), 4)
-            })
-            
-    df = pd.DataFrame(records)
-    
-    # Introduce ~0.4% realistic sensor missing values and slight range anomalies for the audit step
-    audit_noise_idx = np.random.choice(df.index, size=int(0.004 * len(df)), replace=False)
-    for idx in audit_noise_idx[:len(audit_noise_idx)//2]:
-        df.loc[idx, 'fertiliser_kg_ha'] = np.nan
-    for idx in audit_noise_idx[len(audit_noise_idx)//2:]:
-        df.loc[idx, 'soil_type'] = np.nan
-        
-    df.to_csv(filepath, index=False)
-    print(f"[DATA GEN] Successfully created and saved synthetic dataset to '{filepath}'.")
-    return df
-
-
 # ==============================================================================
 # STEP 1: DATA AUDIT
 # ==============================================================================
@@ -553,14 +375,14 @@ def perform_temporal_analysis(df: pd.DataFrame) -> tuple[pd.DataFrame, list[int]
 
 
 # ==============================================================================
-# STEP 5: SPATIAL ANALYSIS (PySAL Moran's I, Getis-Ord & Folium Map)
+# STEP 5: SPATIAL ANALYSIS (PySAL Moran's I and Getis-Ord)
 # ==============================================================================
 def perform_spatial_analysis(df: pd.DataFrame, drought_years: list[int]) -> tuple[pd.DataFrame, float, float]:
     """
     Conducts spatial econometric analysis:
     - Regional yield anomaly summary table
     - PySAL Global Moran's I and Getis-Ord Gi* hotspot analysis
-    - Interactive Folium map with styled circle markers
+    - Static Python scatter map with styled points
     """
     print("\n" + "=" * 80)
     print("STEP 5: SPATIAL AUTOCORRELATION & HOTSPOT ANALYSIS")
@@ -614,44 +436,27 @@ def perform_spatial_analysis(df: pd.DataFrame, drought_years: list[int]) -> tupl
     })
     spatial_summary.to_csv(os.path.join(OUTPUT_TAB_DIR, "spatial_moran_getisord_summary.csv"), index=False)
     
-    # 3. Interactive Folium Map
-    center_lat, center_lon = gdf['latitude'].mean(), gdf['longitude'].mean()
-    m = folium.Map(location=[center_lat, center_lon], zoom_start=5, tiles="CartoDB positron")
-    
-    # Sample 150 representative fields for smooth interactive visualization
-    map_sample = gdf.sample(n=min(180, len(gdf)), random_state=RANDOM_SEED)
-    
-    for _, row in map_sample.iterrows():
-        # Color based on anomaly: Green for positive, Red for severe deficit
-        anom = row['yield_anomaly_pct']
-        color = '#2ca02c' if anom > 5 else ('#d62728' if anom < -15 else ('#ff7f0e' if anom < 0 else '#1f77b4'))
-        
-        popup_html = f"""
-        <div style="font-family: Arial; font-size: 12px; width: 220px;">
-            <b>Field ID:</b> {row['field_id']}<br/>
-            <b>Region:</b> {row['region']}<br/>
-            <b>District:</b> {row['district']}<br/>
-            <b>Crop:</b> {row['crop']}<br/>
-            <b>Yield:</b> {row['yield_t_ha']:.2f} t/ha<br/>
-            <b>Yield Anomaly:</b> <span style="color:{color}; font-weight:bold;">{anom:.1f}%</span><br/>
-            <b>Irrigation:</b> {'Yes' if row['irrigated'] == 1 else 'No'}<br/>
-            <b>Spatial Cluster:</b> {row['Hotspot_Category']}
-        </div>
-        """
-        folium.CircleMarker(
-            location=[row['latitude'], row['longitude']],
-            radius=6,
-            color=color,
-            fill=True,
-            fill_color=color,
-            fill_opacity=0.75,
-            popup=folium.Popup(popup_html, max_width=250),
-            tooltip=f"{row['field_id']} ({row['crop']}): {anom:.1f}% anomaly"
-        ).add_to(m)
-        
-    map_html_path = os.path.join(OUTPUT_FIG_DIR, "spatial_yield_anomaly_map.html")
-    m.save(map_html_path)
-    print(f"[Folium Map] Saved interactive map to '{map_html_path}'.")
+    # 3. Static Python map (PNG) keeps generated artifacts readable on GitHub.
+    color_by_category = {
+        'Hotspot (High Yield)': '#2ca02c',
+        'Coldspot (Severe Deficit)': '#d62728',
+        'Not Significant': '#7f7f7f'
+    }
+    fig, ax = plt.subplots(figsize=(10, 7))
+    for category, color in color_by_category.items():
+        points = gdf[gdf['Hotspot_Category'] == category]
+        if not points.empty:
+            ax.scatter(points['longitude'], points['latitude'], c=color, label=category,
+                       s=28, alpha=0.75, edgecolors='white', linewidths=0.25)
+    ax.set(title='Field Yield Anomalies and Spatial Clusters (2012)',
+           xlabel='Longitude', ylabel='Latitude')
+    ax.legend(title='Cluster classification', loc='best')
+    ax.grid(alpha=0.2)
+    fig.tight_layout()
+    map_path = os.path.join(OUTPUT_FIG_DIR, 'spatial_yield_anomaly_map.png')
+    fig.savefig(map_path, dpi=200, bbox_inches='tight')
+    plt.close(fig)
+    print(f"[Spatial Plot] Saved static map to '{map_path}'.")
     
     return reg_table, moran.I, moran.p_sim
 
@@ -1357,14 +1162,17 @@ def main():
     print("      AGRIBUSINESS EXPLORATORY DATA ANALYSIS (EDA) SUITE")
     print("=" * 80)
     
-    # Load dataset or generate synthetic panel
+    # Load the supplied dataset; never substitute synthetic data for missing input.
     data_path = os.path.join(BASE_DIR, "agri_data.csv")
     if not os.path.exists(data_path):
         data_path_data = os.path.join(DATA_DIR, "agri_data.csv")
         if os.path.exists(data_path_data):
             data_path = data_path_data
         else:
-            df_raw = generate_synthetic_agri_data(data_path, n_rows=12000)
+            raise FileNotFoundError(
+                f"Could not find agri_data.csv. Place it in {BASE_DIR} or {DATA_DIR}. "
+                "The analysis does not generate replacement data."
+            )
     
     if 'df_raw' not in locals():
         print(f"[DATA LOAD] Loading dataset from: {data_path}")

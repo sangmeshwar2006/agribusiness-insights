@@ -15,7 +15,6 @@ plotly>=5.15.0
 
 # Spatial Analysis & GIS Mapping
 geopandas>=0.13.0
-folium>=0.14.0
 libpysal>=4.8.0
 esda>=2.5.0
 

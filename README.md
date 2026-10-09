@@ -59,14 +59,14 @@ agribusiness-data-cleaning/
 │   └── data_cleaning.py                    # Standalone raw agricultural data cleaning pipeline
 │
 ├── outputs/
-│   ├── figures/                            # 200 DPI publication-grade figures (V1–V6) & Folium map
+│   ├── figures/                            # Python-generated PNG figures (V1–V6) and static spatial plot
 │   │   ├── V1_yearly_yield_price_trend.png
 │   │   ├── V2_crop_yield_ranked_cv.png
 │   │   ├── V3_regional_yield_anomaly_heatmap.png
 │   │   ├── V4_rainfall_vs_yield_quadratic.png
 │   │   ├── V5_yield_by_practice_box_violin.png
 │   │   ├── V6_correlation_lagged_cross_correlation.png
-│   │   └── spatial_yield_anomaly_map.html
+│   │   └── spatial_yield_anomaly_map.png
 │   └── tables/                             # 12 result tables exported as CSV
 │       ├── data_audit_summary.csv
 │       ├── engineered_features_summary.csv
@@ -114,7 +114,7 @@ agribusiness-data-cleaning/
    - Regional yield anomaly matrix under drought shocks.
    - PySAL Global Moran's $I$ permutation test ($k$-nearest neighbor spatial weights $W$).
    - Getis-Ord Local $G^*$ hotspot and coldspot classification.
-   - Interactive Folium geographic map (`spatial_yield_anomaly_map.html`).
+   - Static Python geographic plot (`spatial_yield_anomaly_map.png`).
 6. **Step 6: Multivariate Modeling & Farm Typology**
    - Non-parametric Spearman correlation matrix.
    - Partial correlation between yield and rainfall controlling for heat stress, fertiliser, and irrigation.
@@ -246,7 +246,7 @@ When `eda_agribusiness.py` runs, it automatically outputs:
 | `outputs/figures/` | `V4_rainfall_vs_yield_quadratic.png` | Quadratic water response curves with optimal rainfall vertex |
 | `outputs/figures/` | `V5_yield_by_practice_box_violin.png` | Yield distributions across irrigation, variety, and fertiliser |
 | `outputs/figures/` | `V6_correlation_lagged_cross_correlation.png` | Spearman matrix + 0–16 week lag cross-correlation impulse curve |
-| `outputs/figures/` | `spatial_yield_anomaly_map.html` | Interactive Folium GIS map with field popups and cluster indicators |
+| `outputs/figures/` | `spatial_yield_anomaly_map.png` | Static Python GIS plot with field cluster indicators |
 | `outputs/tables/` | `data_audit_summary.csv` | Shape, missingness, domain range checks, IQR vs robust MAD outliers |
 | `outputs/tables/` | `engineered_features_summary.csv` | Descriptive statistics for engineered agronomic and financial features |
 | `outputs/tables/` | `univariate_summary_statistics.csv` | Central tendencies, IQR, skewness, kurtosis, Shapiro-Wilk test |
@@ -266,7 +266,7 @@ When `eda_agribusiness.py` runs, it automatically outputs:
 
 - **Data Manipulation**: `pandas`, `numpy`, `scipy`
 - **Econometrics & Statistics**: `statsmodels`, `pymannkendall`, `scikit-learn`
-- **Spatial Econometrics & GIS**: `geopandas`, `libpysal`, `esda`, `shapely`, `folium`
+- **Spatial Econometrics & GIS**: `geopandas`, `libpysal`, `esda`, `shapely`
 - **Visual Analytics**: `matplotlib`, `seaborn`, `plotly`
 - **Interactive Computing**: `jupyter`, `ipykernel`
 

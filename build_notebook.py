@@ -26,7 +26,7 @@ nb_cells = [
             "2. **Step 2: Feature Engineering** (Detrended yield anomalies, CV %, growing-season rain, heat-stress days, CPI-deflated real prices, gross margin/ha)\n",
             "3. **Step 3: Univariate Analysis** (Parametric & non-parametric summaries, skewness, kurtosis, Shapiro-Wilk normality testing)\n",
             "4. **Step 4: Temporal Analysis** (Mann-Kendall trend tests, Sen's slope, 3-year rolling statistics, STL seasonal decomposition, drought identification)\n",
-            "5. **Step 5: Spatial Analysis** (Regional shock vulnerability, PySAL Moran's I spatial autocorrelation, Getis-Ord $G^*$ hotspots, Folium interactive mapping)\n",
+            "5. **Step 5: Spatial Analysis** (Regional shock vulnerability, PySAL Moran's I spatial autocorrelation, Getis-Ord $G^*$ hotspots, static Python mapping)\n",
             "6. **Step 6: Multivariate Analysis** (Spearman rank correlation, partial correlation, ANOVA/Kruskal-Wallis practice effects, non-linear water response, K-Means farm typology)\n",
             "7. **Step 7: Hypothesis Testing (H1–H8)** (Formal tests, test statistics, p-values, effect sizes, 95% bootstrap CIs, and Benjamini-Hochberg FDR adjustments)\n",
             "8. **Executive Agribusiness Insights** (Strategic implications for irrigation capex, crop mix hedging, parametric insurance design, and grain contracting)"
@@ -53,7 +53,6 @@ nb_cells = [
             "import seaborn as sns\n",
             "import geopandas as gpd\n",
             "from shapely.geometry import Point\n",
-            "import folium\n",
             "import libpysal\n",
             "import esda\n",
             "from sklearn.cluster import KMeans\n",
@@ -91,7 +90,7 @@ nb_cells = [
         "metadata": {},
         "source": [
             "## Step 0: Dataset Ingestion & Synthetic Generation Engine\n",
-            "The pipeline loads `agri_data.csv`. If absent, it automatically synthesizes a realistic agribusiness panel of 12,000 records spanning 2005–2024 across 8 agro-ecological zones and 6 major commercial crops with macro drought episodes (2008, 2012, 2018, 2022)."
+            "The pipeline loads the supplied `agri_data.csv`. If it is missing, loading stops with instructions; no replacement data or findings are generated."
         ]
     },
     {
@@ -106,9 +105,9 @@ nb_cells = [
             "    if os.path.exists(data_file_alt):\n",
             "        data_file = data_file_alt\n",
             "    else:\n",
-            "        # Generate synthetic data\n",
-            "        from eda_agribusiness import generate_synthetic_agri_data\n",
-            "        df_raw = generate_synthetic_agri_data(data_file, n_rows=12000)\n",
+            "        raise FileNotFoundError(\n",
+            "            'Place agri_data.csv in the project directory or its data/ directory.'\n",
+            "        )\n",
             "\n",
             "df_raw = pd.read_csv(data_file)\n",
             "print(f'Ingested dataset with {df_raw.shape[0]:,} records and {df_raw.shape[1]} columns.')\n",
@@ -212,7 +211,7 @@ nb_cells = [
             "- Regional yield vulnerability matrix under drought shocks.\n",
             "- **PySAL Global Moran's I**: Measures spatial autocorrelation of yield anomalies across geographic coordinates.\n",
             "- **Getis-Ord $G^*$ Local Statistics**: Identifies spatial clusters of resilience (hotspots) vs systemic drought failure (coldspots).\n",
-            "- **Interactive Folium Point Map**: Interactive GIS visualization with tooltips and anomaly color coding."
+            "- **Static Python Point Map (PNG)**: Field locations colored by spatial cluster classification."
         ]
     },
     {
